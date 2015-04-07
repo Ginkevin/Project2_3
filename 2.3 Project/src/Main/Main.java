@@ -1,11 +1,10 @@
 package Main;
-import GUI.Login;
+import java.io.IOException;
+
 
 public class Main {
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		Login start = new Login();
+	
+	public static void main(String[] args) throws IOException {
+		Worker arbeit = new Worker();
 	}
-
 }

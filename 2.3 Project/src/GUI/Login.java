@@ -5,6 +5,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +16,11 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+
+import Main.Worker;
+import Network.Connect;
+import Network.Receive;
+import Network.Send;
 
 public class Login extends JFrame implements ActionListener{
 	/**
@@ -25,7 +32,7 @@ public class Login extends JFrame implements ActionListener{
 	private List<JButton> colorButtons = new ArrayList<>();
 	private static final long serialVersionUID = 1L;
 
-	public Login(){
+	public Login(Worker arbeit){
 		setResizable(false);
 		setTitle("Log in");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -54,6 +61,14 @@ public class Login extends JFrame implements ActionListener{
 
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				String name = nameField.getText();
+				try {
+					Connect.getInstance().sendLogin(nameField.getText());
+				} catch (UnknownHostException e1) {
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 				Lobby gameloby = new Lobby(nameField.getText());
 				Dispose();
 			}
