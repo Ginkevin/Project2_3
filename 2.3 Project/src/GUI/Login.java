@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,6 +35,7 @@ public class Login extends JFrame implements ActionListener{
 
 	public Login(Worker arbeit){
 		setResizable(false);
+		this.setIconImage(new ImageIcon("./src/Images/Saah_ed_Nueb.png").getImage());
 		setTitle("Log in");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 300, 200);

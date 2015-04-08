@@ -10,11 +10,12 @@ public class Main {
 		
 		Splash splash = new Splash();    	
     	try {
-			Thread.sleep(1000);
+			Thread.sleep(3000);
 		} catch (InterruptedException e) {
 			
 		}    	
 		
 		Worker arbeit = new Worker();
+		splash.dispose();
 	}
 }

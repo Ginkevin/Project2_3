@@ -30,6 +30,7 @@ public class Lobby extends JFrame implements ActionListener{
 	
 	public Lobby(String name){
 		this.name = name;
+		this.setIconImage(new ImageIcon("./src/Images/Saah_ed_Nueb.png").getImage());
 		setTitle("Lobby");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
