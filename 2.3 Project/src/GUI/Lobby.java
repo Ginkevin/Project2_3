@@ -117,7 +117,7 @@ public class Lobby extends JFrame implements ActionListener{
 		this.setVisible(true);
 		
 		//create new thread that updates the playerlist
-				Thread t = new Thread(new Runnable() {
+				Thread players = new Thread(new Runnable() {
 			         public void run()
 			         {
 			              // Insert some method call here.
@@ -135,7 +135,28 @@ public class Lobby extends JFrame implements ActionListener{
 						}
 			         }
 				});
-				t.start();
+				players.start();
+				
+		//create new thread that updates the challengelist
+				Thread challenges = new Thread(new Runnable() {
+			         public void run()
+			         {
+			              // Insert some method call here.
+			        	 ((DefaultListModel<String>) challengeList.getModel()).clear();	
+			        	 try {
+							String[] antwoord = Connect.getInstance().getChallangeList();
+							if (antwoord != null){
+								((DefaultListModel<String>) challengeList.getModel()).addElement("Naam: "+ antwoord[0] +" GameType: "+ antwoord[1] + " Ticket: " + antwoord[2]);	
+							}
+							Thread.sleep(3333);
+							run();
+						} catch (InterruptedException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			         }
+				});
+				challenges.start();
 	}
 	
 	

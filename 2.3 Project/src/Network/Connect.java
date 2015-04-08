@@ -16,6 +16,8 @@ public class Connect {
 	
 	private static Connect networkcontroller;
 	public String[] PlayerList;
+	//ChallangeList is altijd .length = 3 (Naam, Spel, SpelNummer)
+	public String[] ChallangeList;
 	
 	public static Connect getInstance() throws UnknownHostException, IOException{
 		if(networkcontroller == null){
@@ -51,6 +53,12 @@ public class Connect {
 		Send.Message("get playerlist");
 		getParserResult();
 		return PlayerList;
+	}
+	
+	public String[] getChallangeList() throws InterruptedException{
+		Parser.setWaitingForMessage();
+		getParserResult();
+		return ChallangeList;
 	}
 	
 	public String getParserResult() throws InterruptedException{
