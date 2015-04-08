@@ -5,9 +5,12 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import Network.Connect;
 
 /**
  * 
@@ -69,6 +72,7 @@ public class Lobby extends JFrame implements ActionListener{
 		playerList.setBorder(null);
 		playerList.setFont(new Font("Arial", Font.PLAIN, 18));
 		playerList.setModel(new DefaultListModel<String>());
+
 		challengeButton.setFont(new Font("Arial", Font.PLAIN, 18));
 		challengeButton.setBounds(30, 343, 312, 36);
 		contentPane.add(challengeButton);
@@ -111,7 +115,30 @@ public class Lobby extends JFrame implements ActionListener{
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
 		this.setVisible(true);
+		
+		//create new thread that updates the playerlist
+				Thread t = new Thread(new Runnable() {
+			         public void run()
+			         {
+			              // Insert some method call here.
+			        	 ((DefaultListModel<String>) playerList.getModel()).clear();	
+			        	 try {
+							String[] antwoord = Connect.getInstance().getPlayerList();
+							for (int i= 0; i < antwoord.length; i++){
+								((DefaultListModel<String>) playerList.getModel()).addElement(antwoord[i]);	
+							}
+							Thread.sleep(5000);
+							run();
+						} catch (InterruptedException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			         }
+				});
+				t.start();
 	}
+	
+	
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {

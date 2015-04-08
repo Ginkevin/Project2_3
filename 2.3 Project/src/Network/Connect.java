@@ -15,6 +15,7 @@ public class Connect {
 	private Receive receive;
 	
 	private static Connect networkcontroller;
+	public String[] PlayerList;
 	
 	public static Connect getInstance() throws UnknownHostException, IOException{
 		if(networkcontroller == null){
@@ -43,6 +44,13 @@ public class Connect {
 		Parser.setWaitingForMessage();
 		Send.Message("LOGIN " + name);
 		return getParserResult();
+	}
+	
+	public String[] getPlayerList() throws UnknownHostException, IOException, InterruptedException{
+		Parser.setWaitingForMessage();
+		Send.Message("get playerlist");
+		getParserResult();
+		return PlayerList;
 	}
 	
 	public String getParserResult() throws InterruptedException{
