@@ -30,7 +30,6 @@ public class Lobby extends JFrame implements ActionListener{
 	
 	public Lobby(String name){
 		this.name = name;
-		this.setIconImage(new ImageIcon("./src/Images/Saah_ed_Nueb.png").getImage());
 		setTitle("Lobby");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -50,7 +49,7 @@ public class Lobby extends JFrame implements ActionListener{
 		playerLabel.setBounds(110, 60, 200, 22);
 		contentPane.add(playerLabel);
 
-		JLabel playerListLabel = new JLabel("Beschikbare Cука блять:");
+		JLabel playerListLabel = new JLabel("Beschikbare szuka:");
 		playerListLabel.setFont(new Font("Arial", Font.PLAIN, 18));
 		playerListLabel.setBounds(30, 107, 215, 22);
 		contentPane.add(playerListLabel);

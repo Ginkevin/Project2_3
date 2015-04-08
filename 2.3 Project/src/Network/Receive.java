@@ -3,19 +3,38 @@ package Network;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Socket;
+import java.net.UnknownHostException;
+
 import Network.Connect;
+import Network.Parser;
 
-public class Receive {
-	BufferedReader input;
-	public Receive(Socket socket) throws IOException{
-		 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		 this.input = in;
 
+public class Receive implements Runnable{
+	private BufferedReader input;
+	boolean running = true;
+	
+	public Receive() throws IOException{
+		 input = new BufferedReader(new InputStreamReader(Connect.getInstance().getConnection().getInputStream()));
+	}
+
+	public void newReceiver() throws UnknownHostException, IOException{
+		input = new BufferedReader(new InputStreamReader(Connect.getInstance().getConnection().getInputStream()));
 	}
 	
-	public String ReceivedMessage() throws IOException{
-		return input.readLine();
+	@Override
+	public void run() {
+		while (running == true){
+			String input_text;
+			try {
+		while((input_text = input.readLine()) != null){
+					Parser.parse(input_text);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				running = false;
+			}
+		}
 		
 	}
 }
