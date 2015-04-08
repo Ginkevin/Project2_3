@@ -50,7 +50,7 @@ public class Lobby extends JFrame implements ActionListener{
 		playerLabel.setBounds(110, 60, 200, 22);
 		contentPane.add(playerLabel);
 
-		JLabel playerListLabel = new JLabel("Beschikbare szuka:");
+		JLabel playerListLabel = new JLabel("Beschikbare Cука блять:");
 		playerListLabel.setFont(new Font("Arial", Font.PLAIN, 18));
 		playerListLabel.setBounds(30, 107, 215, 22);
 		contentPane.add(playerListLabel);
