@@ -98,7 +98,30 @@ public class Lobby extends JFrame implements ActionListener{
 								mainPanel2.setVisible(true);
 							}
 							else if (Connect.getInstance().Game == "reversi"){
-								mainPanel.setVisible(true);
+								if (Connect.getInstance().Myturn == true){
+									fieldlistOrtello[27].setBackground(Color.red);
+									fieldlistOrtello[27].setText("x");
+									fieldlistOrtello[36].setBackground(Color.red);
+									fieldlistOrtello[36].setText("x");
+									fieldlistOrtello[35].setBackground(Color.green);
+									fieldlistOrtello[35].setText("o");
+									fieldlistOrtello[28].setBackground(Color.green);
+									fieldlistOrtello[28].setText("o");
+									mainPanel.setVisible(true);
+									System.out.println("MY TURN REVERSI");
+								}
+								else if(Connect.getInstance().Myturn == false){
+									fieldlistOrtello[27].setBackground(Color.green);
+									fieldlistOrtello[27].setText("o");
+									fieldlistOrtello[36].setBackground(Color.green);
+									fieldlistOrtello[36].setText("o");
+									fieldlistOrtello[35].setBackground(Color.red);
+									fieldlistOrtello[35].setText("x");
+									fieldlistOrtello[28].setBackground(Color.red);
+									fieldlistOrtello[28].setText("x");
+									mainPanel.setVisible(true);
+									System.out.println("HIS TURN REVERSI");
+								}
 							}
 							Connect.getInstance().GameStart = false;
 							Connect.getInstance().GameisPlaying = true;
@@ -161,24 +184,34 @@ public class Lobby extends JFrame implements ActionListener{
 							
 						}
 						if (!Connect.getInstance().GameisPlaying){
-							mainPanel2.setVisible(false);
+						//	mainPanel2.setVisible(false);
+						//	mainPanel.setVisible(false);
 							if (Connect.getInstance().gameResult == 'w'){
 								forfitB.setText("WON!");
 								forfitB.setBackground(Color.green);
 								Connect.getInstance().gameResult = 'u';
-								clearTicTacToeBoard();
+								if(Connect.getInstance().Game.contains("tic")){
+									clearTicTacToeBoard();
+								}
+								else { clearOrtelloBoard();}
 							}
 							if (Connect.getInstance().gameResult == 'l'){
 								forfitB.setText("LOST!");
 								forfitB.setBackground(Color.red);
 								Connect.getInstance().gameResult = 'u';
-								clearTicTacToeBoard();
+								if(Connect.getInstance().Game.contains("tic")){
+									clearTicTacToeBoard();
+								}
+								else { clearOrtelloBoard();}
 							}
 							if (Connect.getInstance().gameResult == 'd'){
 								forfitB.setText("DRAW!");
 								forfitB.setBackground(Color.yellow);
 								Connect.getInstance().gameResult = 'u';
-								clearTicTacToeBoard();
+								if(Connect.getInstance().Game.contains("tic")){
+									clearTicTacToeBoard();
+								}
+								else { clearOrtelloBoard();}
 							}
 							if (Connect.getInstance().gameResult == 'u'){
 								
@@ -346,22 +379,37 @@ public class Lobby extends JFrame implements ActionListener{
 		mainPanel.setBounds(450, 80, 621, 512);
 		//contentPane.add(mainPanel);
 		fieldlistOrtello = new JButton[64];
-		for (int i = 0; i< (64); i++){
-			fieldlistOrtello[i] = new JButton(""+i);
-			fieldlistOrtello[i].setForeground(Color.white);
-			fieldlistOrtello[i].setBackground(Color.white);
-			fieldlistOrtello[i].setFont(new Font("Arial", Font.PLAIN, 70));
-			fieldlistOrtello[i].addActionListener(new ActionListener() {
+		for (int j = 0; j< (64); j++){
+			fieldlistOrtello[j] = new JButton(""+j);
+			fieldlistOrtello[j].setForeground(Color.white);
+			fieldlistOrtello[j].setBackground(Color.white);
+			fieldlistOrtello[j].setFont(new Font("Arial", Font.PLAIN, 40));
+			fieldlistOrtello[j].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-				/**
-				String position = e.getSource().toString().replace(",defaultCapable=true]", "");
-				String[] resultposition = position.split("text=");
-				System.out.println(resultposition[1]);
-				**/
+					try {
+					String position = e.getSource().toString().replace(",defaultCapable=true]", "");
+					String[] resultposition = position.split("text=");
+					//resultposition[1] TESTED: BETWEEN 0-63
+					System.out.println(resultposition[1]);
+					fieldlistOrtello[Integer.parseInt(resultposition[1])].setText("O");
+					fieldlistOrtello[Integer.parseInt(resultposition[1])].setBackground(Color.green);
+					setPosition = Integer.parseInt(resultposition[1]);
+					Connect.getInstance().sendMove(setPosition);
+					System.out.println("move send: " + setPosition);
+					Connect.getInstance().Myturn = false;
+					indicator.setBackground(Color.red);
+					mainPanel.setVisible(false);
+					mainPanel.setVisible(true);
+					}
+					catch (IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 		}
-	});
-			mainPanel.add(fieldlistOrtello[i]);
+	});	
+			mainPanel.add(fieldlistOrtello[j]);
 		}
+		contentPane.add(mainPanel);
 		mainPanel.setVisible(false);
 	}
 	
@@ -393,10 +441,7 @@ public class Lobby extends JFrame implements ActionListener{
 						mainPanel2.setVisible(false);
 						mainPanel2.setVisible(true);
 						//}
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (InterruptedException e1) {
+					} catch (IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
@@ -418,10 +463,11 @@ public class Lobby extends JFrame implements ActionListener{
 	}
 	
 	public void clearOrtelloBoard(){
-		for (int j = 0; j <= 8; j++){
-			fieldlist[j].setForeground(Color.white);
-			fieldlist[j].setBackground(Color.white);
-			fieldlist[j].setText(""+j);
+		for (int k = 0; k < 64; k++){
+			mainPanel.setVisible(false);
+			fieldlistOrtello[k].setForeground(Color.white);
+			fieldlistOrtello[k].setBackground(Color.white);
+			fieldlistOrtello[k].setText(""+k);
 		}
 	}
 	public void addTurnIndicator(){
