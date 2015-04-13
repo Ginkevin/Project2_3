@@ -34,22 +34,21 @@ public class Parser {
 		}
 		else if(command.contains("SVR PLAYERLIST")){
 			//lastReceivedMessage = command;
+			//lastReceivedMessage = command;
 			command = command.replace("SVR PLAYERLIST [", "");
 			command = command.replace("]", "");
 			command = command.replace("\"", "");
 			command = command.replace(",", "");
 			String[] playerList = command.split("\\s+");
 			Connect.getInstance().PlayerList = playerList;
-			lastReceivedMessage = command;
 			if (getWaitingForMessage() == true){
 				waiting_for_message = false;
 			}
 		}
-		else if (command.contains("Ingeschreven voor speltype")){
-			//todo
-		}
+		//uitdaging ontvangen
 		else if(command.contains("SVR GAME CHALLENGE")){
 			//todo
+			lastReceivedMessage = command;
 			// SVR GAME CHALLENGE {CHALLENGER: "Sjors", GAMETYPE: "Guess Game", CHALLENGENUMBER: "1"}
 			command = command.replace("SVR GAME CHALLENGE {CHALLENGER: ", "");
 			command = command.replace("GAMETYPE: ", "");
@@ -58,11 +57,72 @@ public class Parser {
 			command = command.replace(",", "");
 			String[] challangeList = command.split("\\s+");
 			Connect.getInstance().ChallangeList = challangeList;
-			lastReceivedMessage = command;
 			if (getWaitingForMessage() == true){
 				waiting_for_message = false;
 			}
 		}
+		else if (command.contains("SVR GAMELIST")){
+			lastReceivedMessage = command;
+			command = command.replace("SVR GAMELIST [", "");
+			command = command.replace("\"", "");
+			command = command.replace("]", "");
+			String[] gamelist = command.split(",");
+			Connect.getInstance().GameList = gamelist; 
+			if (getWaitingForMessage() == true){
+				 waiting_for_message = false;
+			 }
+		}
+		else if (command.contains("YOURTURN")){
+			Connect.getInstance().Myturn = true;
+		}
+		else if (command.contains("SVR GAME MATCH")){
+			System.out.println(command);
+			command = command.replace("SVR GAME MATCH {PLAYERTOMOVE: ", "");
+			command = command.replace(", OPPONENT: \"testdummy\"}", "");
+			command = command.replace(" GAMETYPE: ", "");
+			command = command.replace("\"", "");
+			command = command.replace("\"", "");
+			command = command.replace("}", "");
+			command = command.replace("OPPONENT: ", "");
+			lastReceivedMessage = command;
+			System.out.println(command);
+			Connect.getInstance().GameStart = true;
+			if (getWaitingForMessage() == true){
+				 waiting_for_message = false;
+			 }
+		}
+
+		else if (command.contains("SVR GAME MOVE")){
+			//SVR GAME MOVE {PLAYER: "<speler>", DETAILS: "<reactie spel op zet>", MOVE: "<zet>"}
+			//System.out.println("ZET IS GEDAAN: " + command);
+			command = command.replace("SVR GAME MOVE {PLAYER: ", "");
+			command = command.replace("DETAILS: ", "");
+			command = command.replace("MOVE: ", "");
+			command = command.replace("}","");
+			command = command.replace("\"","");
+			command = command.replace(",","");
+			String[] receiveList = command.split("\\s+");
+			//0 = player 1= position
+			if(!receiveList[0].equalsIgnoreCase(Connect.getInstance().Playername)){
+				lastReceivedMessage = command;
+				Connect.getInstance().EnemyMove = Integer.parseInt(receiveList[1]);
+				System.out.println(receiveList[1]);
+				System.out.println("enemy turn being processed");
+				System.out.println(""+ receiveList[0].toLowerCase() + " and " + Connect.getInstance().Playername.toLowerCase()+ " not the same");
+				if (getWaitingForMessage() == true){
+					 waiting_for_message = false;
+				 }
+			}
+			else if(receiveList[0].equalsIgnoreCase(Connect.getInstance().Playername)){
+				lastReceivedMessage = "EMPTY";
+				System.out.println("my turn being processed: output: "+ receiveList[0]);
+				if (getWaitingForMessage() == true){
+					 waiting_for_message = false;
+				 }
+			}
+			
+		}
+		
 	}
 	
 }

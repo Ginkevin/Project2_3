@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,7 +29,7 @@ public class Login extends JFrame implements ActionListener{
 	 */
 	private JPanel contentPane;
 	private JTextField nameField;
-	private JButton startButton;
+	private JButton startButton, loading;
 	private List<JButton> colorButtons = new ArrayList<>();
 	private static final long serialVersionUID = 1L;
 
@@ -58,12 +59,14 @@ public class Login extends JFrame implements ActionListener{
 		startButton.setFont(new Font("Arial", Font.PLAIN, 18));
 		startButton.setBounds(31, 60, 240, 36);
 		contentPane.add(startButton);
-
+		
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					String login = Connect.getInstance().sendLogin(nameField.getText());
-					System.out.println(login);
+					Connect.getInstance().Playername = nameField.getText();
+					String getGameList = Connect.getInstance().getGameList();
+					//System.out.println(login);
 				} catch (UnknownHostException e1) {
 					e1.printStackTrace();
 				} catch (IOException e1) {
@@ -72,7 +75,12 @@ public class Login extends JFrame implements ActionListener{
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				Lobby gameloby = new Lobby(nameField.getText());
+				try {
+					Lobby gameloby = new Lobby(nameField.getText());
+				} catch (IOException | InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				Dispose();
 			}
 		});

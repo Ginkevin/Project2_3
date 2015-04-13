@@ -13,11 +13,13 @@ public class Connect {
 	private Socket socketconnection;
 	private boolean threadStarted = false;
 	private Receive receive;
-	
 	private static Connect networkcontroller;
-	public String[] PlayerList;
-	//ChallangeList is altijd .length = 3 (Naam, Spel, SpelNummer)
-	public String[] ChallangeList;
+	
+	//ChallangeList is altijd .length = 3 (Naam, Spelnummer, Game)
+	public String[] ChallangeList, GameList, PlayerList;
+	public String Game, Player, Playername;
+	public boolean GameStart, GameisPlaying, Myturn = false;
+	public int EnemyMove = 100;
 	
 	public static Connect getInstance() throws UnknownHostException, IOException{
 		if(networkcontroller == null){
@@ -48,6 +50,24 @@ public class Connect {
 		return getParserResult();
 	}
 	
+	public String sendLogout() throws UnknownHostException, IOException, InterruptedException{
+		Parser.setWaitingForMessage();
+		Send.Message("logout");
+		return getParserResult();
+	}
+	
+	public String sendSubscribe(String game) throws InterruptedException, UnknownHostException, IOException{
+		Parser.setWaitingForMessage();
+		Send.Message("subscribe " + game);
+		return getParserResult();
+	}
+	
+	public String sendChallenge(String player, String Game) throws InterruptedException, UnknownHostException, IOException{
+		Parser.setWaitingForMessage();
+		Send.Message("CHALLENGE \"" + player + "\" \"" + Game + "\"");
+		return getParserResult();
+	}
+	
 	public String[] getPlayerList() throws UnknownHostException, IOException, InterruptedException{
 		Parser.setWaitingForMessage();
 		Send.Message("get playerlist");
@@ -55,10 +75,39 @@ public class Connect {
 		return PlayerList;
 	}
 	
+	public String getGameList() throws UnknownHostException, IOException, InterruptedException{
+		Parser.setWaitingForMessage();
+		Send.Message("get gamelist");
+		return getParserResult();
+	}
+	
 	public String[] getChallangeList() throws InterruptedException{
 		Parser.setWaitingForMessage();
 		getParserResult();
 		return ChallangeList;
+	}
+	
+	public String AcceptChallenge() throws InterruptedException, UnknownHostException, IOException{
+		Parser.setWaitingForMessage();
+		Send.Message("challenge accept "+ChallangeList[1]);
+		return getParserResult();
+	}
+	
+	public String sendMove(int boardnumber) throws InterruptedException, UnknownHostException, IOException{
+		Parser.setWaitingForMessage();
+		Send.Message("move " + boardnumber);
+		return getParserResult();
+	}
+	
+	public String getMove() throws InterruptedException{
+		Parser.setWaitingForMessage();
+		return getParserResult();
+	}
+	
+	public void forfit() throws InterruptedException, UnknownHostException, IOException{
+		Parser.setWaitingForMessage();
+		Send.Message("forfeit");
+		getParserResult();
 	}
 	
 	public String getParserResult() throws InterruptedException{
