@@ -18,6 +18,8 @@ public class Connect {
 	//ChallangeList is altijd .length = 3 (Naam, Spelnummer, Game)
 	public String[] ChallangeList, GameList, PlayerList;
 	public String Game, Player, Playername;
+	//u = unknown, w = win, l = lose
+	public char gameResult = 'u';
 	public boolean GameStart, GameisPlaying, Myturn = false;
 	public int EnemyMove = 100;
 	
@@ -113,7 +115,10 @@ public class Connect {
 	public String getParserResult() throws InterruptedException{
 		while(Parser.getWaitingForMessage() == true){
 			Thread.sleep(10);
+		//	System.out.println("waiting...");
 		}
+		//System.out.println("out of the wait!");
+		Thread.sleep(1000);
 		return getReceivedMessage();
 	}
 	

@@ -74,8 +74,42 @@ public class Parser {
 		}
 		else if (command.contains("YOURTURN")){
 			Connect.getInstance().Myturn = true;
+			if (getWaitingForMessage() == true){
+				 waiting_for_message = false;
+			 }
+		}
+		else if(command.contains("WIN")){
+			Connect.getInstance().GameisPlaying = false;
+			Connect.getInstance().gameResult = 'w';
+			Connect.getInstance().EnemyMove = 100;
+			if (getWaitingForMessage() == true){
+				 waiting_for_message = false;
+			 }
+		}
+		else if (command.contains("LOSS")){
+			Connect.getInstance().GameisPlaying = false;
+			Connect.getInstance().gameResult = 'l';
+			Connect.getInstance().EnemyMove = 100;
+			if (getWaitingForMessage() == true){
+				 waiting_for_message = false;
+			 }
+		}
+		else if (command.contains("DRAW")){
+			Connect.getInstance().GameisPlaying = false;
+			Connect.getInstance().gameResult = 'd';
+			Connect.getInstance().EnemyMove = 100;
+			if (getWaitingForMessage() == true){
+				 waiting_for_message = false;
+			 }
 		}
 		else if (command.contains("SVR GAME MATCH")){
+			String GAMEMATCH = command.toLowerCase();
+			if(GAMEMATCH.contains("tic")){
+				Connect.getInstance().Game = "tictactoe";
+			}
+			else if(GAMEMATCH.contains("rev")){
+				Connect.getInstance().Game = "reversi";
+			}
 			System.out.println(command);
 			command = command.replace("SVR GAME MATCH {PLAYERTOMOVE: ", "");
 			command = command.replace(", OPPONENT: \"testdummy\"}", "");
@@ -120,6 +154,7 @@ public class Parser {
 					 waiting_for_message = false;
 				 }
 			}
+			
 			
 		}
 		

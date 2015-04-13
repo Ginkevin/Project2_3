@@ -10,9 +10,6 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-
-
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -33,15 +30,14 @@ public class Lobby extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	public static boolean BeginGame;
 	private JPanel contentPane, gameListPanel, gameList, mainPanel2, mainPanel;
-	private JButton challengeButton, acceptButton, indicator;
+	private JButton challengeButton, acceptButton, indicator, forfitB, AIButton;
 	private JButton[] fieldlist, fieldlistOrtello;
 	private JList<String> playerList, challengeList;
 	public String name = "Saah Ed Nueb";
 	public String previous = "leeg";
-	private Thread players, challenges, moveReceiver, moveSender;
+	private Thread players, challenges, moveReceiver, getResult;
 	private int setPosition = 100;
-	private boolean maglopen = false;
-	private boolean threadtrue = false;
+	private boolean AI; 
 	
 	public Lobby(String name) throws UnknownHostException, IOException, InterruptedException{
 		this.name = name;
@@ -98,12 +94,18 @@ public class Lobby extends JFrame implements ActionListener{
 							}
 							
 						  if (Connect.getInstance().GameStart == true){
-							mainPanel2.setVisible(true);
+							if (Connect.getInstance().Game == "tictactoe"){
+								mainPanel2.setVisible(true);
+							}
+							else if (Connect.getInstance().Game == "reversi"){
+								mainPanel.setVisible(true);
+							}
 							Connect.getInstance().GameStart = false;
 							Connect.getInstance().GameisPlaying = true;
-							moveReceiver.start();
-							players.interrupt();
-							challenges.interrupt();
+							forfitB.setText("Forfit");
+							forfitB.setBackground(Color.red);
+							//players.interrupt();
+							//kochallenges.interrupt();
 							
 						}
 						  }
@@ -125,7 +127,6 @@ public class Lobby extends JFrame implements ActionListener{
 				moveReceiver = new Thread(new Runnable() {
 					public void run(){
 						try {
-						while(Connect.getInstance().GameisPlaying){
 						if (Connect.getInstance().Myturn == true){
 							indicator.setBackground(Color.green);
 						}
@@ -141,35 +142,59 @@ public class Lobby extends JFrame implements ActionListener{
 						else {
 							System.out.println("GEEN MOVE ONTVANGEN");
 						}
-						}
+
+						Thread.sleep(1000);
+						run();
 						} 
 					 catch (InterruptedException | IOException e) {
 						e.printStackTrace();
 					 }
 					}  
 				});
+				moveReceiver.start();
 				
-				moveSender = new Thread(new Runnable() {
+				getResult = new Thread(new Runnable() {
 					public synchronized  void run(){
-						try {
-							while(Connect.getInstance().GameisPlaying){
-								if(maglopen){
-							Connect.getInstance().sendMove(setPosition);
-							System.out.println("move send: " + setPosition);
-							Connect.getInstance().Myturn = false;
-							indicator.setBackground(Color.red);
-							mainPanel2.setVisible(false);
-							mainPanel2.setVisible(true);
-								}
-							}
-						} catch (InterruptedException | IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+					try {
+						Connect.getInstance().getParserResult();
+						if (Connect.getInstance().GameisPlaying){
+							
 						}
-						
+						if (!Connect.getInstance().GameisPlaying){
+							mainPanel2.setVisible(false);
+							if (Connect.getInstance().gameResult == 'w'){
+								forfitB.setText("WON!");
+								forfitB.setBackground(Color.green);
+								Connect.getInstance().gameResult = 'u';
+								clearTicTacToeBoard();
+							}
+							if (Connect.getInstance().gameResult == 'l'){
+								forfitB.setText("LOST!");
+								forfitB.setBackground(Color.red);
+								Connect.getInstance().gameResult = 'u';
+								clearTicTacToeBoard();
+							}
+							if (Connect.getInstance().gameResult == 'd'){
+								forfitB.setText("DRAW!");
+								forfitB.setBackground(Color.yellow);
+								Connect.getInstance().gameResult = 'u';
+								clearTicTacToeBoard();
+							}
+							if (Connect.getInstance().gameResult == 'u'){
+								
+							}
+						}
+						Thread.sleep(2000);
+						run();
+					} 
+					catch (IOException | InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 					}
 				});
-				
+				getResult.start();
 	}
 
 
@@ -229,7 +254,7 @@ public class Lobby extends JFrame implements ActionListener{
 		challengeButton.setBounds(30, 343, 300, 36);
 		contentPane.add(challengeButton);
 		
-		JButton forfitB = new JButton();
+		forfitB = new JButton();
 		forfitB.setBounds(700, 25, 75, 36);
 		forfitB.setText("Forfit");
 		forfitB.addActionListener(new ActionListener() {
@@ -243,6 +268,28 @@ public class Lobby extends JFrame implements ActionListener{
 			}
 		});
 		contentPane.add(forfitB);
+		
+		AIButton = new JButton();
+		AIButton.setBounds(800, 25, 75, 36);
+		AIButton.setText("AI");
+		AIButton.setBackground(Color.red);
+		AIButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(AIButton.getBackground() == Color.red){
+					AI = true;
+					AIButton.setBackground(Color.green);
+					AIButton.setVisible(false);
+					AIButton.setVisible(true);
+				}
+				else if(AIButton.getBackground() == Color.green){
+					AI = false;
+					AIButton.setBackground(Color.red);
+					AIButton.setVisible(false);
+					AIButton.setVisible(true);
+				}
+			}
+		});
+		contentPane.add(AIButton);
 
 		gameList = new JPanel();
 		gameList.setBounds(30, 414, 312, 265);
@@ -280,42 +327,13 @@ public class Lobby extends JFrame implements ActionListener{
 				try {
 					String acceptChallenge = Connect.getInstance().AcceptChallenge();
 					System.out.println("Accepted challenge! ");
+					((DefaultListModel<String>) challengeList.getModel()).clear();	
 				} catch (InterruptedException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				
-				/**
-				try {
-					String acceptChallenge = Connect.getInstance().AcceptChallenge();
-					System.out.println(acceptChallenge);
-					//result[0] = player to begin
-					//result[1] = game to play
-					String[] resultchallange = acceptChallenge.split(",");
-					if(resultchallange[1] != null && resultchallange[1].contains("Tic")){
-						System.out.println(resultchallange[1]);
-						System.out.println("YES!");
-						System.out.println("welke speler mag beginnen: "+ resultchallange[0]);
-						System.out.println("welke naam ik heb: "+ getName());
-					}
-					else { System.out.println("GEEN ACCEPT RESPONSE! " + acceptChallenge);}
-					if(resultchallange[1].contains("Rever")){
-						mainPanel.setVisible(true);
-					}
-					if(resultchallange[0].contains(getName())){
-						indicator.setBackground(Color.green);
-					}
-					
-						
-				} catch (IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} **/
 			}
 		});
-
-		//acceptButton.addActionListener(this);
-		//challengeButton.addActionListener(this);
 		
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
@@ -359,7 +377,7 @@ public class Lobby extends JFrame implements ActionListener{
 			fieldlist[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					try {
-						if(Connect.getInstance().GameisPlaying){
+						//if(Connect.getInstance().GameisPlaying){
 						String position = e.getSource().toString().replace(",defaultCapable=true]", "");
 						String[] resultposition = position.split("text=");
 						System.out.println(resultposition[1]);
@@ -367,13 +385,14 @@ public class Lobby extends JFrame implements ActionListener{
 						fieldlist[Integer.parseInt(resultposition[1])].setBackground(Color.green);
 						//resultposition[1] TESTED: BETWEEN 0-8
 						setPosition = Integer.parseInt(resultposition[1]);
-						Connect.getInstance().sendMove(setPosition);
+						String test1 = Connect.getInstance().sendMove(setPosition);
+						System.out.println(test1);
 						System.out.println("move send: " + setPosition);
 						Connect.getInstance().Myturn = false;
 						indicator.setBackground(Color.red);
 						mainPanel2.setVisible(false);
 						mainPanel2.setVisible(true);
-						}
+						//}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -389,6 +408,22 @@ public class Lobby extends JFrame implements ActionListener{
 		mainPanel2.setVisible(false);
 	}
 	
+	public void clearTicTacToeBoard(){
+		for (int j = 0; j <= 8; j++){
+			mainPanel2.setVisible(false);
+			fieldlist[j].setForeground(Color.white);
+			fieldlist[j].setBackground(Color.white);
+			fieldlist[j].setText(""+j);
+		}
+	}
+	
+	public void clearOrtelloBoard(){
+		for (int j = 0; j <= 8; j++){
+			fieldlist[j].setForeground(Color.white);
+			fieldlist[j].setBackground(Color.white);
+			fieldlist[j].setText(""+j);
+		}
+	}
 	public void addTurnIndicator(){
 		JLabel turnIndicator = new JLabel("Your turn: ");
 		turnIndicator.setFont(new Font("Arial", Font.PLAIN, 18));
