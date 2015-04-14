@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import BoardGame.TicTacToe;
 import Network.Connect;
 /**
  * 
@@ -35,12 +36,15 @@ public class Lobby extends JFrame implements ActionListener{
 	private JList<String> playerList, challengeList;
 	public String name = "Saah Ed Nueb";
 	public String previous = "leeg";
-	private Thread players, challenges, moveReceiver, getResult;
+	private Thread players, challenges, moveReceiver, getResult, AImove;
 	private int setPosition = 100;
-	private boolean AI; 
+	private boolean AI;
+	private boolean AIsetSide = true;
+	private TicTacToe t;
 	
 	public Lobby(String name) throws UnknownHostException, IOException, InterruptedException{
 		this.name = name;
+		t = new TicTacToe();
 		setTitle("Lobby");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -160,6 +164,8 @@ public class Lobby extends JFrame implements ActionListener{
 							int nr = Connect.getInstance().EnemyMove;
 							fieldlist[nr].setText("X");
 							fieldlist[nr].setBackground(Color.red);
+							t.playMove(nr);
+							System.out.print(t.toString());
 							Connect.getInstance().EnemyMove = 100;
 						}
 						else {
@@ -175,6 +181,45 @@ public class Lobby extends JFrame implements ActionListener{
 					}  
 				});
 				moveReceiver.start();
+				
+				AImove = new Thread(new Runnable() {
+					public void run(){
+						try {
+					if(Connect.getInstance().GameisPlaying){
+						if(AI){
+							if (Connect.getInstance().Myturn){
+								Connect.getInstance().Myturn = false;
+								Thread.sleep(2000);
+								if (AIsetSide){
+									t.setSide("ai");
+									AIsetSide = false;
+								}
+								int tmp = t.chooseMove();
+								t.playMove(tmp);
+								System.out.print(t.toString());
+								Connect.getInstance().sendMove(tmp);
+								System.out.println("set myturn naar false");
+								fieldlist[tmp].setText("O");
+								fieldlist[tmp].setBackground(Color.green);
+								indicator.setBackground(Color.red);
+							}
+							else if(!Connect.getInstance().Myturn){
+								if (AIsetSide){
+									t.setSide("speler");
+									AIsetSide = false;
+								}
+							}
+						}
+					}
+						Thread.sleep(2000);
+						run();
+					} 
+					 catch (InterruptedException | IOException e) {
+						e.printStackTrace();
+					 }
+					}  
+				});
+				AImove.start();
 				
 				getResult = new Thread(new Runnable() {
 					public synchronized  void run(){

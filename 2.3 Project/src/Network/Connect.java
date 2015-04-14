@@ -10,6 +10,7 @@ import Network.Parser;
 public class Connect {
 	private String ip = "localhost";
 	private int port = 7789;
+	//7789 - localhost
 	private Socket socketconnection;
 	private boolean threadStarted = false;
 	private Receive receive;
