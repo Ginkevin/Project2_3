@@ -139,7 +139,7 @@ public class TicTacToe
 
 
 	// Simple supporting routines
-	void clearBoard( )
+	public void clearBoard( )
 	{
 		for (int row = 0; row < board.length; row++) {
 			for (int col = 0; col < board[row].length; col++) {

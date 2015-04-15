@@ -55,8 +55,15 @@ public class Parser {
 			command = command.replace("CHALLENGENUMBER: ", "");
 			command = command.replace("\"", "");
 			command = command.replace(",", "");
+			if (command.toLowerCase().contains("tic")){
+				Connect.getInstance().Game = "tictactoe";
+			}
+			else if (command.toLowerCase().contains("rev")){
+				Connect.getInstance().Game = "reversi";;
+			}
 			String[] challangeList = command.split("\\s+");
 			Connect.getInstance().ChallangeList = challangeList;
+			System.out.println(challangeList[2]);
 			if (getWaitingForMessage() == true){
 				waiting_for_message = false;
 			}

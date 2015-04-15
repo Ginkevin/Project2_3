@@ -14,6 +14,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import BoardGame.TicTacToe;
+import BoardGame.Reversi;
 import Network.Connect;
 /**
  * 
@@ -51,12 +52,13 @@ public class Lobby extends JFrame implements ActionListener{
 		setBounds(100, 100, 1115, 650);
 		//create layout for players and challenges
 		setLayout();
+		//System.out.println(Reversi.getReversi().toString());
 		addTurnIndicator();
 		//run threads that update player/challenge list
 		setThreads();
 		addTictactoeBoard();
+		Reversi.getReversi().clearBoard();
 		addOrtelloBoard();
-		
 	}
 	
 	
@@ -66,20 +68,29 @@ public class Lobby extends JFrame implements ActionListener{
 				 players = new Thread(new Runnable() {
 					public void run(){
 					   // get playerlist
-					   ((DefaultListModel<String>) playerList.getModel()).clear();	
 					      try {
-							String[] antwoord = Connect.getInstance().getPlayerList();
-							for (int i= 0; i < antwoord.length; i++){
-								((DefaultListModel<String>) playerList.getModel()).addElement(antwoord[i]);	
+					    	 
+					    	  System.out.println("kom ik hier wel?");
+							//Connect.getInstance().getPlayerList();
+					    	  String[] getInstance = Connect.getInstance().getChallangeList();
+					    	  System.out.println("volgens mij loopt het hier vast: RESULT: OUI!");
+							for (int i= 0; i < Connect.getInstance().PlayerList.length; i++){
+								 ((DefaultListModel<String>) playerList.getModel()).clear(); 
+								((DefaultListModel<String>) playerList.getModel()).addElement(Connect.getInstance().PlayerList[i]);	
+								System.out.println("zoekt spelers");
+								System.out.println(Connect.getInstance().PlayerList[i]);
+								playerList.setVisible(false);
+								playerList.setVisible(true);
 							}
-							Thread.sleep(8000);
+							Thread.sleep(4000);	
 							run();
-							} 
+					      } 
 					       catch (InterruptedException | IOException e) {
 								// TODO Auto-generated catch block
-					    	   players.interrupt();
-					    	   challenges.interrupt();
+					    	   //players.interrupt();
+					    	   //challenges.interrupt();
 							}
+					      
 					 }
 				});
 				players.start();
@@ -96,7 +107,7 @@ public class Lobby extends JFrame implements ActionListener{
 									((DefaultListModel<String>) challengeList.getModel()).addElement("Naam: "+ antwoord[0] +" Ticket: "+ antwoord[1] + " GameType: " + antwoord[2]);	
 									previous = antwoord[0];
 							}
-							
+						  }
 						  if (Connect.getInstance().GameStart == true){
 							if (Connect.getInstance().Game == "tictactoe"){
 								mainPanel2.setVisible(true);
@@ -105,37 +116,45 @@ public class Lobby extends JFrame implements ActionListener{
 								if (Connect.getInstance().Myturn == true){
 									fieldlistOrtello[27].setBackground(Color.red);
 									fieldlistOrtello[27].setText("x");
+									Reversi.getReversi().setMoveComputer(27);
 									fieldlistOrtello[36].setBackground(Color.red);
 									fieldlistOrtello[36].setText("x");
+									Reversi.getReversi().setMoveComputer(36);
 									fieldlistOrtello[35].setBackground(Color.green);
 									fieldlistOrtello[35].setText("o");
+									Reversi.getReversi().setMoveHuman(35);
 									fieldlistOrtello[28].setBackground(Color.green);
 									fieldlistOrtello[28].setText("o");
+									Reversi.getReversi().setMoveHuman(28);
 									mainPanel.setVisible(true);
 									System.out.println("MY TURN REVERSI");
 								}
 								else if(Connect.getInstance().Myturn == false){
 									fieldlistOrtello[27].setBackground(Color.green);
 									fieldlistOrtello[27].setText("o");
+									Reversi.getReversi().setMoveHuman(27);
 									fieldlistOrtello[36].setBackground(Color.green);
 									fieldlistOrtello[36].setText("o");
+									Reversi.getReversi().setMoveHuman(36);
 									fieldlistOrtello[35].setBackground(Color.red);
 									fieldlistOrtello[35].setText("x");
+									Reversi.getReversi().setMoveComputer(35);
 									fieldlistOrtello[28].setBackground(Color.red);
 									fieldlistOrtello[28].setText("x");
+									Reversi.getReversi().setMoveComputer(28);
 									mainPanel.setVisible(true);
 									System.out.println("HIS TURN REVERSI");
 								}
 							}
 							Connect.getInstance().GameStart = false;
-							Connect.getInstance().GameisPlaying = true;
+							//Connect.getInstance().GameisPlaying = true;
 							forfitB.setText("Forfit");
 							forfitB.setBackground(Color.red);
 							//players.interrupt();
 							//kochallenges.interrupt();
 							
 						}
-						  }
+						  
 								Thread.sleep(3333);
 								run();
 							} 
@@ -160,6 +179,8 @@ public class Lobby extends JFrame implements ActionListener{
 						String moveEnemie = Connect.getInstance().getMove();
 						// EnemyMove ; 100 = default
 						if (Connect.getInstance().EnemyMove != 100){
+							//move contains tic from tictactoe
+							if(Connect.getInstance().Game.toLowerCase().contains("tic")){
 							System.out.println("move received : "+ Connect.getInstance().EnemyMove);
 							int nr = Connect.getInstance().EnemyMove;
 							fieldlist[nr].setText("X");
@@ -167,6 +188,22 @@ public class Lobby extends JFrame implements ActionListener{
 							t.playMove(nr);
 							System.out.print(t.toString());
 							Connect.getInstance().EnemyMove = 100;
+							}
+							//move contains rev from reversi
+							if(Connect.getInstance().Game.toLowerCase().contains("rev")){
+								System.out.println("move received : "+ Connect.getInstance().EnemyMove);
+								int nr = Connect.getInstance().EnemyMove;
+								int tmprow = nr / 8;
+								int tmpcol = nr % 8;
+								//Reversi.getReversi().getLegalMove(tmprow, tmpcol, 1, 0, true);
+								//Reversi.getReversi().setMoveComputer(nr);
+								if(Reversi.getReversi().getLegalMove(tmprow, tmpcol, 1, 0, true)){
+									Reversi.getReversi().setMoveComputer(nr);
+								}
+								setBoardColours();
+								System.out.println(Reversi.getReversi().toString());
+								Connect.getInstance().EnemyMove = 100;
+							}
 						}
 						else {
 							System.out.println("GEEN MOVE ONTVANGEN");
@@ -237,6 +274,7 @@ public class Lobby extends JFrame implements ActionListener{
 								Connect.getInstance().gameResult = 'u';
 								if(Connect.getInstance().Game.contains("tic")){
 									clearTicTacToeBoard();
+									t = new TicTacToe();
 								}
 								else { clearOrtelloBoard();}
 							}
@@ -246,6 +284,7 @@ public class Lobby extends JFrame implements ActionListener{
 								Connect.getInstance().gameResult = 'u';
 								if(Connect.getInstance().Game.contains("tic")){
 									clearTicTacToeBoard();
+									t = new TicTacToe();
 								}
 								else { clearOrtelloBoard();}
 							}
@@ -255,6 +294,7 @@ public class Lobby extends JFrame implements ActionListener{
 								Connect.getInstance().gameResult = 'u';
 								if(Connect.getInstance().Game.contains("tic")){
 									clearTicTacToeBoard();
+									t = new TicTacToe();
 								}
 								else { clearOrtelloBoard();}
 							}
@@ -440,6 +480,14 @@ public class Lobby extends JFrame implements ActionListener{
 					fieldlistOrtello[Integer.parseInt(resultposition[1])].setBackground(Color.green);
 					setPosition = Integer.parseInt(resultposition[1]);
 					Connect.getInstance().sendMove(setPosition);
+					//getLegalMove(int row,int col,int currentplayer, int nextplayer, boolean flip)
+					int rowtmp = setPosition / 8;
+					int columntmp = setPosition % 8;
+					if(Reversi.getReversi().getLegalMove(rowtmp, columntmp, 0, 1, true)){
+						Reversi.getReversi().setMoveHuman(setPosition);
+					}
+					System.out.println(Reversi.getReversi().toString());
+					setBoardColours();
 					System.out.println("move send: " + setPosition);
 					Connect.getInstance().Myturn = false;
 					indicator.setBackground(Color.red);
@@ -529,6 +577,34 @@ public class Lobby extends JFrame implements ActionListener{
 	
 	public String getName(){
 		return this.name;
+	}
+	
+	/**
+	 * zet het board in de lobby gelijk aan het board in het back-end
+	 * @static int[][] board: het board waar de back-end gebruik van maakt.
+	 */
+	public void setBoardColours(){
+		int[][] board = Reversi.getReversi().getBoard();
+		for (int y = 0; y < 8; y++){
+			for (int z= 0; z < 8; z++){
+				if(board[y][z] != 2){
+					//ENEMY
+					if (board[y][z] == 1){
+						fieldlistOrtello[(8*y) + z].setBackground(Color.red);
+						fieldlistOrtello[(8*y) + z].setText("X");
+						System.out.println("zit in ENEMY setColour and text");
+					}
+					//US
+					else if(board[y][z] == 0){
+						fieldlistOrtello[(8*y) + z].setBackground(Color.green);
+						fieldlistOrtello[(8*y) + z].setText("O");
+						System.out.println("zit in Human setColour and text");
+					}
+				}
+			}
+		}
+		mainPanel.setVisible(false);
+		mainPanel.setVisible(true);
 	}
 
 }
