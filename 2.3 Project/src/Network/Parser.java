@@ -38,9 +38,15 @@ public class Parser {
 			command = command.replace("SVR PLAYERLIST [", "");
 			command = command.replace("]", "");
 			command = command.replace("\"", "");
-			command = command.replace(",", "");
-			String[] playerList = command.split("\\s+");
+			//command = command.replace(",", "");
+			String[] playerList = command.split(", ");
 			Connect.getInstance().PlayerList = playerList;
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
 			if (getWaitingForMessage() == true){
 				waiting_for_message = false;
 			}

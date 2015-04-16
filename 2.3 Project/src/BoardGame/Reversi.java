@@ -36,6 +36,10 @@ public class Reversi {
 		int columntmp = move % 8;
 		board[rowtmp][ columntmp] = 1;
 	}
+	public void setMoveAi(int col, int row) {
+		board[row][col] = 0;
+		
+	}
 	
 	public int getBoardValue(int location){
 		return board[location/8][location%8];
@@ -56,8 +60,12 @@ public class Reversi {
                         stepcount++;
                         i = row + stepcount*r;
                         j = col + stepcount*c; 
+                        if(j == 4 && i == 1){
+                        	System.out.println("bla");
+                        }
                     }
                     while((i>0)&&(i<=7)&&(j>0)&&(j<=7)&&board[i][j] == nextplayer);
+                    
                         if((i>0)&&(i<=7)&&(j>0)&&(j<=7)&&(stepcount >1)&&(board[i][j] == currentplayer)){
                             legal = true;
                             if (flip){

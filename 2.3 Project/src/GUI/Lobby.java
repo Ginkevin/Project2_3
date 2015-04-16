@@ -15,6 +15,7 @@ import javax.swing.border.EmptyBorder;
 
 import BoardGame.TicTacToe;
 import BoardGame.Reversi;
+import BoardGame.GameIntelligence;
 import Network.Connect;
 /**
  * 
@@ -42,10 +43,12 @@ public class Lobby extends JFrame implements ActionListener{
 	private boolean AI;
 	private boolean AIsetSide = true;
 	private TicTacToe t;
+	private GameIntelligence intelli;
 	
 	public Lobby(String name) throws UnknownHostException, IOException, InterruptedException{
 		this.name = name;
 		t = new TicTacToe();
+		intelli = new GameIntelligence();
 		setTitle("Lobby");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -72,11 +75,11 @@ public class Lobby extends JFrame implements ActionListener{
 					    	 
 					    	  System.out.println("kom ik hier wel?");
 							//Connect.getInstance().getPlayerList();
-					    	  String[] getInstance = Connect.getInstance().getChallangeList();
+					    	  String[] getInstance = Connect.getInstance().getPlayerList();
 					    	  System.out.println("volgens mij loopt het hier vast: RESULT: OUI!");
-							for (int i= 0; i < Connect.getInstance().PlayerList.length; i++){
-								 ((DefaultListModel<String>) playerList.getModel()).clear(); 
-								((DefaultListModel<String>) playerList.getModel()).addElement(Connect.getInstance().PlayerList[i]);	
+					    	  ((DefaultListModel<String>) playerList.getModel()).clear(); 
+							for (int i= 0; i < getInstance.length; i++){								 
+								((DefaultListModel<String>) playerList.getModel()).addElement(getInstance[i]);	
 								System.out.println("zoekt spelers");
 								System.out.println(Connect.getInstance().PlayerList[i]);
 								playerList.setVisible(false);
@@ -195,12 +198,40 @@ public class Lobby extends JFrame implements ActionListener{
 								int nr = Connect.getInstance().EnemyMove;
 								int tmprow = nr / 8;
 								int tmpcol = nr % 8;
+								if(nr == 21) 
+									nr = 21;
 								//Reversi.getReversi().getLegalMove(tmprow, tmpcol, 1, 0, true);
 								//Reversi.getReversi().setMoveComputer(nr);
 								if(Reversi.getReversi().getLegalMove(tmprow, tmpcol, 1, 0, true)){
 									Reversi.getReversi().setMoveComputer(nr);
+									setBoardColours();
+									Connect.getInstance().Myturn = true;
+									indicator.setBackground(Color.green);
+									System.out.println("Registered enemy move, going to AI!");
+									Thread.sleep(500);
+									if(AI)
+									{
+										int[] aiMove = intelli.getAiMove(Reversi.getReversi().getBoard());
+										System.out.println("AI move colum = " + aiMove[1]);
+										System.out.println("AI move row = " + aiMove[0]);
+										if(Reversi.getReversi().getLegalMove(aiMove[0], aiMove[1], 0, 1, true)){
+											Reversi.getReversi().setMoveAi(aiMove[1], aiMove[0]);
+										}
+										
+										int positionToSend = (aiMove[0] * 8) + (aiMove[1] % 8);																				
+										System.out.println("Position to send: " + positionToSend);
+										
+										Connect.getInstance().sendMove(positionToSend);
+										Connect.getInstance().Myturn = false;
+										indicator.setBackground(Color.red);
+										mainPanel.setVisible(false);
+										mainPanel.setVisible(true);										
+
+										setBoardColours();
+										System.out.println("Send with AI and changed board!");
+										//Thread.sleep(100);
+									}
 								}
-								setBoardColours();
 								System.out.println(Reversi.getReversi().toString());
 								Connect.getInstance().EnemyMove = 100;
 							}
@@ -276,7 +307,10 @@ public class Lobby extends JFrame implements ActionListener{
 									clearTicTacToeBoard();
 									t = new TicTacToe();
 								}
-								else { clearOrtelloBoard();}
+								else { 
+									clearOrtelloBoard(); 
+									Reversi.getReversi().clearBoard();
+									System.out.println("Cleared ortelloboard");}
 							}
 							if (Connect.getInstance().gameResult == 'l'){
 								forfitB.setText("LOST!");
@@ -286,7 +320,10 @@ public class Lobby extends JFrame implements ActionListener{
 									clearTicTacToeBoard();
 									t = new TicTacToe();
 								}
-								else { clearOrtelloBoard();}
+								else { 
+									clearOrtelloBoard(); 
+									Reversi.getReversi().clearBoard();
+									System.out.println("Cleared ortelloboard");}
 							}
 							if (Connect.getInstance().gameResult == 'd'){
 								forfitB.setText("DRAW!");
@@ -296,7 +333,10 @@ public class Lobby extends JFrame implements ActionListener{
 									clearTicTacToeBoard();
 									t = new TicTacToe();
 								}
-								else { clearOrtelloBoard();}
+								else { 
+									clearOrtelloBoard();
+									Reversi.getReversi().clearBoard();
+									}
 							}
 							if (Connect.getInstance().gameResult == 'u'){
 								
