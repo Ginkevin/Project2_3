@@ -1,11 +1,16 @@
 package BoardGame;
 
+import java.util.Stack;
+
 public class Reversi {
 	private static Reversi reversi;
 	private int [ ] [ ] board = new int[ 8 ][ 8 ];
 	private static final int HUMAN        = 0; 
 	private static final int COMPUTER     = 1; 
 	public  static final int EMPTY        = 2;
+	
+	public final int ROWS = 8;
+	public final int COLUMNS = 8;
 	
 	public static Reversi getReversi(){
 		if (reversi == null){
@@ -41,6 +46,11 @@ public class Reversi {
 		
 	}
 	
+	public void setMoveForRepositioning(int row, int col, int player)
+	{
+		board[row][col] = player;
+	}
+	
 	public int getBoardValue(int location){
 		return board[location/8][location%8];
 	}
@@ -60,12 +70,8 @@ public class Reversi {
                         stepcount++;
                         i = row + stepcount*r;
                         j = col + stepcount*c; 
-                        if(j == 4 && i == 1){
-                        	System.out.println("bla");
-                        }
                     }
                     while((i>0)&&(i<=7)&&(j>0)&&(j<=7)&&board[i][j] == nextplayer);
-                    
                         if((i>0)&&(i<=7)&&(j>0)&&(j<=7)&&(stepcount >1)&&(board[i][j] == currentplayer)){
                             legal = true;
                             if (flip){
@@ -79,6 +85,53 @@ public class Reversi {
          
         return legal;
     }
+	
+	public Stack<Integer> getLegalMove2(int move, int player) {
+		Stack<Integer> willBeReplaced = new Stack<Integer>();
+		Stack<Integer> temp = new Stack<Integer>();
+		int opp;
+		if (player == HUMAN)
+			opp = COMPUTER;
+		else
+			opp = HUMAN;
+		int moveRow = (int)Math.floor(move / COLUMNS);
+		int moveColumn = move%COLUMNS;
+		for (int y = -1; y <= 1; ++y) {
+			for (int x = -1; x <= 1; ++x) {
+				int trow = moveRow + y;
+				int tcolumn = moveColumn + x;
+				if (trow >= 0 && tcolumn >= 0 && trow < ROWS && tcolumn < COLUMNS && board[trow][tcolumn] == opp) {
+					while (trow < ROWS && tcolumn < COLUMNS && trow >= 0 && tcolumn >= 0) {
+						if (trow * COLUMNS + tcolumn > 0 && trow < ROWS && tcolumn < COLUMNS && board[trow][tcolumn] == opp) {
+							temp.push(trow * COLUMNS + tcolumn);
+						} else if (board[trow][tcolumn] == player) {
+							while (temp.size() > 0) {
+								willBeReplaced.push(temp.pop());
+							}
+							temp.clear();
+							break;
+						} else if(board[trow][tcolumn] == EMPTY) {
+							temp.clear();
+							break;
+						}
+						if (y > 0) {
+							++trow;
+						} else if (y < 0) {
+							--trow;
+						}
+						if (x > 0) {
+							++tcolumn;
+						} else if (x < 0) {
+							--tcolumn;
+						}
+					}
+					temp.clear();
+				}
+			}
+		}
+		willBeReplaced.push(move);
+		return willBeReplaced;
+	}
 	
 	public String toString()
 	{

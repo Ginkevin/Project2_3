@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Stack;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -129,6 +130,8 @@ public class Lobby extends JFrame implements ActionListener{
 									fieldlistOrtello[28].setBackground(Color.green);
 									fieldlistOrtello[28].setText("o");
 									Reversi.getReversi().setMoveHuman(28);
+									
+									getAImove();
 									mainPanel.setVisible(true);
 									System.out.println("MY TURN REVERSI");
 								}
@@ -176,10 +179,15 @@ public class Lobby extends JFrame implements ActionListener{
 				moveReceiver = new Thread(new Runnable() {
 					public void run(){
 						try {
-						if (Connect.getInstance().Myturn == true){
+						while(true){
+							
+						
+							if (Connect.getInstance().Myturn == true){
 							indicator.setBackground(Color.green);
 						}
 						String moveEnemie = Connect.getInstance().getMove();
+						System.out.println("getMove =" + moveEnemie);
+						System.out.println("enemyMove = " + Connect.getInstance().EnemyMove);
 						// EnemyMove ; 100 = default
 						if (Connect.getInstance().EnemyMove != 100){
 							//move contains tic from tictactoe
@@ -194,55 +202,84 @@ public class Lobby extends JFrame implements ActionListener{
 							}
 							//move contains rev from reversi
 							if(Connect.getInstance().Game.toLowerCase().contains("rev")){
-								System.out.println("move received : "+ Connect.getInstance().EnemyMove);
+								System.out.println("move received : "+ Connect.getInstance().EnemyMove);								
 								int nr = Connect.getInstance().EnemyMove;
+								Connect.getInstance().EnemyMove = 100;
+								
 								int tmprow = nr / 8;
 								int tmpcol = nr % 8;
-								if(nr == 21) 
-									nr = 21;
 								//Reversi.getReversi().getLegalMove(tmprow, tmpcol, 1, 0, true);
 								//Reversi.getReversi().setMoveComputer(nr);
-								if(Reversi.getReversi().getLegalMove(tmprow, tmpcol, 1, 0, true)){
+								//if(Reversi.getReversi().getLegalMove(tmprow, tmpcol, 1, 0, true)){
+								Stack<Integer> replaced = new Stack<Integer>();
+								int tmp = 0;
+								
+								replaced = Reversi.getReversi().getLegalMove2(nr, 1);
+								tmp = replaced.pop();
+								
+								//board[(int)Math.floor(tmp / columns)][tmp % columns] = 2;
+								
+								while (replaced.size() > 0) {
+									tmp = replaced.pop();						
+									Reversi.getReversi().setMoveForRepositioning((tmp/8),(tmp % 8), 1);
+								}
+								
+								replaced = null;
+								
 									Reversi.getReversi().setMoveComputer(nr);
 									setBoardColours();
 									Connect.getInstance().Myturn = true;
 									indicator.setBackground(Color.green);
 									System.out.println("Registered enemy move, going to AI!");
 									Thread.sleep(500);
+									
 									if(AI)
 									{
 										int[] aiMove = intelli.getAiMove(Reversi.getReversi().getBoard());
 										System.out.println("AI move colum = " + aiMove[1]);
 										System.out.println("AI move row = " + aiMove[0]);
-										if(Reversi.getReversi().getLegalMove(aiMove[0], aiMove[1], 0, 1, true)){
-											Reversi.getReversi().setMoveAi(aiMove[1], aiMove[0]);
+										//if(Reversi.getReversi().getLegalMove(aiMove[0], aiMove[1], 0, 1, true)){
+										
+										int positionToSend = (aiMove[0] * 8) + (aiMove[1] % 8);		
+										
+										Stack<Integer> replaced2 = new Stack<Integer>();
+										int tmp2 = 0;
+										
+										replaced2 = Reversi.getReversi().getLegalMove2(positionToSend, 0);
+										tmp2 = replaced2.pop();
+										
+										while (replaced2.size() > 0) {
+											tmp2 = replaced2.pop();						
+											Reversi.getReversi().setMoveForRepositioning((tmp2 / 8),(tmp2 % 8), 0);
 										}
 										
-										int positionToSend = (aiMove[0] * 8) + (aiMove[1] % 8);																				
-										System.out.println("Position to send: " + positionToSend);
+										replaced = null;
 										
-										Connect.getInstance().sendMove(positionToSend);
-										Connect.getInstance().Myturn = false;
+										Reversi.getReversi().setMoveAi(aiMove[1], aiMove[0]);
+										//}
+																												
+										System.out.println("Position to send: " + positionToSend);									
 										indicator.setBackground(Color.red);
 										mainPanel.setVisible(false);
 										mainPanel.setVisible(true);										
 
 										setBoardColours();
 										System.out.println("Send with AI and changed board!");
-										//Thread.sleep(100);
+										Connect.getInstance().Myturn = false;		
+										
+										System.out.println(Reversi.getReversi().toString());
+										Connect.getInstance().sendMove(positionToSend);	
 									}
-								}
-								System.out.println(Reversi.getReversi().toString());
-								Connect.getInstance().EnemyMove = 100;
+								}								
+								Thread.sleep(1000);
 							}
-						}
+						//}
 						else {
 							System.out.println("GEEN MOVE ONTVANGEN");
-						}
-
-						Thread.sleep(1000);
-						run();
+							Thread.sleep(1000);		
+						}				
 						} 
+						}
 					 catch (InterruptedException | IOException e) {
 						e.printStackTrace();
 					 }
@@ -307,10 +344,7 @@ public class Lobby extends JFrame implements ActionListener{
 									clearTicTacToeBoard();
 									t = new TicTacToe();
 								}
-								else { 
-									clearOrtelloBoard(); 
-									Reversi.getReversi().clearBoard();
-									System.out.println("Cleared ortelloboard");}
+								else { clearOrtelloBoard(); Reversi.getReversi().clearBoard();}
 							}
 							if (Connect.getInstance().gameResult == 'l'){
 								forfitB.setText("LOST!");
@@ -320,10 +354,7 @@ public class Lobby extends JFrame implements ActionListener{
 									clearTicTacToeBoard();
 									t = new TicTacToe();
 								}
-								else { 
-									clearOrtelloBoard(); 
-									Reversi.getReversi().clearBoard();
-									System.out.println("Cleared ortelloboard");}
+								else { clearOrtelloBoard();Reversi.getReversi().clearBoard();}
 							}
 							if (Connect.getInstance().gameResult == 'd'){
 								forfitB.setText("DRAW!");
@@ -333,10 +364,7 @@ public class Lobby extends JFrame implements ActionListener{
 									clearTicTacToeBoard();
 									t = new TicTacToe();
 								}
-								else { 
-									clearOrtelloBoard();
-									Reversi.getReversi().clearBoard();
-									}
+								else { clearOrtelloBoard();Reversi.getReversi().clearBoard();}
 							}
 							if (Connect.getInstance().gameResult == 'u'){
 								
@@ -361,6 +389,46 @@ public class Lobby extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void getAImove() throws UnknownHostException, IOException, InterruptedException{
+		if(AI)
+		{
+			int[] aiMove = intelli.getAiMove(Reversi.getReversi().getBoard());
+			System.out.println("AI move colum = " + aiMove[1]);
+			System.out.println("AI move row = " + aiMove[0]);
+			//if(Reversi.getReversi().getLegalMove(aiMove[0], aiMove[1], 0, 1, true)){
+			
+			int positionToSend = (aiMove[0] * 8) + (aiMove[1] % 8);		
+			
+			Stack<Integer> replaced2 = new Stack<Integer>();
+			int tmp2 = 0;
+			
+			replaced2 = Reversi.getReversi().getLegalMove2(positionToSend, 0);
+			tmp2 = replaced2.pop();
+			
+			while (replaced2.size() > 0) {
+				tmp2 = replaced2.pop();						
+				Reversi.getReversi().setMoveForRepositioning((tmp2 / 8),(tmp2 % 8), 0);
+			}
+			
+			//replaced = null;
+			
+			Reversi.getReversi().setMoveAi(aiMove[1], aiMove[0]);
+			//}
+			Connect.getInstance().sendMove(positionToSend);																			
+			System.out.println("Position to send: " + positionToSend);									
+			indicator.setBackground(Color.red);
+			mainPanel.setVisible(false);
+			mainPanel.setVisible(true);										
+
+			setBoardColours();
+			System.out.println("Send with AI and changed board!");
+			Connect.getInstance().Myturn = false;		
+			
+			System.out.println(Reversi.getReversi().toString());
+			
+		}
 	}
 	
 	public void setLayout(){
@@ -523,9 +591,24 @@ public class Lobby extends JFrame implements ActionListener{
 					//getLegalMove(int row,int col,int currentplayer, int nextplayer, boolean flip)
 					int rowtmp = setPosition / 8;
 					int columntmp = setPosition % 8;
-					if(Reversi.getReversi().getLegalMove(rowtmp, columntmp, 0, 1, true)){
-						Reversi.getReversi().setMoveHuman(setPosition);
+					//if(Reversi.getReversi().getLegalMove(rowtmp, columntmp, 0, 1, true)){
+					Stack<Integer> replaced = new Stack<Integer>();
+					int tmp = 0;
+					
+					replaced = Reversi.getReversi().getLegalMove2(setPosition, 0);
+					tmp = replaced.pop();
+					
+					while (replaced.size() > 0) {
+						tmp = replaced.pop();						
+						Reversi.getReversi().setMoveForRepositioning((tmp/8),(tmp % 8), 0);
 					}
+					
+					replaced = null;
+					
+					Reversi.getReversi().setMoveHuman(setPosition);
+					
+					//}
+					
 					System.out.println(Reversi.getReversi().toString());
 					setBoardColours();
 					System.out.println("move send: " + setPosition);
